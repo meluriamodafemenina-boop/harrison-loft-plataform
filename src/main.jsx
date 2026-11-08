@@ -37,7 +37,7 @@ const translations = {
     navOpen: 'Open menu', navClose: 'Close menu', languageEnglish: 'English', languageSpanish: 'Español',
     section: 'Section', of: 'of', timeLeft: 'Time remaining', timeout: 'Time expired. This question was recorded as unanswered.',
     instructions: 'Read each instruction carefully. You have 40 seconds for each question. When time runs out, the system advances automatically.',
-    reportNote: 'This integrated summary describes performance on these practice exercises only. It is not a clinical diagnosis.',
+    reportNote: 'This integrated report is intended for review and analysis by the professional responsible for the immigration process.',
     unanswered: 'Unanswered', totalQuestions: 'Questions', analysis: 'Overall performance analysis',
     strengths: 'Observed performance', suggestions: 'General suggestions'
   },
@@ -68,7 +68,7 @@ const translations = {
     navOpen: 'Abrir menú', navClose: 'Cerrar menú', languageEnglish: 'English', languageSpanish: 'Español',
     section: 'Sección', of: 'de', timeLeft: 'Tiempo restante', timeout: 'Se agotó el tiempo. La pregunta quedó registrada como no respondida.',
     instructions: 'Lee cuidadosamente cada instrucción. Dispones de 40 segundos por pregunta. Al terminar el tiempo, el sistema avanzará automáticamente.',
-    reportNote: 'Este resumen integrado describe únicamente el desempeño en estos ejercicios de práctica. No constituye un diagnóstico clínico.',
+    reportNote: 'Este informe integrado está destinado a ser presentado al profesional responsable para su revisión y análisis dentro del proceso migratorio.',
     unanswered: 'Sin respuesta', totalQuestions: 'Preguntas', analysis: 'Análisis general del desempeño',
     strengths: 'Desempeño observado', suggestions: 'Sugerencias generales'
   }
@@ -202,13 +202,13 @@ function App() {
     const total = assessment.length
     const percent = Math.round(correct / total * 100)
     const duration = Math.max(1, Math.round((Date.now() - startedAt) / 1000))
-    const performance = percent >= 85
+    const performance = percent < 50
+      ? 'El resultado global se encuentra por debajo del 50 %. Esto indica que hay habilidades evaluadas que necesitan fortalecerse, especialmente mediante actividades de memoria, atención, comprensión lectora y percepción visual. Se recomienda una revisión individual y un plan de apoyo según el criterio del profesional responsable.'
+      : percent >= 85
       ? 'El desempeño global en estos ejercicios fue alto: se resolvió correctamente una proporción amplia de los retos planteados.'
       : percent >= 65
       ? 'El desempeño global fue intermedio: se resolvió correctamente más de la mitad de los ejercicios, aunque algunos retos requirieron mayor precisión.'
-      : percent >= 40
-      ? 'El desempeño global fue variable: hubo aciertos y dificultades en distintos tipos de tareas. Conviene revisar las instrucciones y practicar estrategias de resolución.'
-      : 'El desempeño global en esta sesión fue bajo en relación con los ejercicios propuestos. Puede ser útil repetir actividades de práctica en un entorno tranquilo.'
+      : 'El desempeño global fue variable: hubo aciertos y dificultades en distintos tipos de tareas. Conviene revisar las instrucciones y practicar estrategias de resolución.'
     const suggestions = unanswered
       ? `Se registraron ${unanswered} preguntas sin respuesta, incluidas las que alcanzaron el límite de tiempo.`
       : 'Todas las preguntas recibieron una respuesta dentro del tiempo disponible.'
@@ -342,8 +342,7 @@ function App() {
         </section>
         <section className="section-heading"><div><span className="eyebrow">HARRISON & LOFT</span><h2>{t.choose}</h2></div><button className="text-btn" onClick={()=>navTo('assessments')}>{t.my} <ArrowRight size={16}/></button></section>
         <section className="activity-grid">{activities.map(item=><ActivityCard key={item.id} item={item} t={t} onClick={beginAssessment}/>)}</section>
-        <section className="feature-strip"><Feature Icon={ShieldCheck} title={t.secure} desc={t.secureDesc}/><Feature Icon={ChartNoAxesColumnIncreasing} title={t.professional} desc={t.professionalDesc}/><Feature Icon={MonitorSmartphone} title={t.devices} desc={t.devicesDesc}/><Feature Icon={Headphones} title={t.support} desc={t.supportDesc}/></section>
-        <section className="disclaimer"><ShieldCheck size={17}/><p>{t.disclaimer}</p></section>
+
       </>}
 
       {page==='assessments' && <div className="page-content"><PageHeading eyebrow="HARRISON & LOFT" title={t.choose}/><p className="assessment-intro">{t.instructions}</p><section className="activity-grid">{activities.map(item=><ActivityCard key={item.id} item={item} t={t} onClick={beginAssessment}/>)}</section><button className="primary-btn full-assessment-btn" onClick={beginAssessment}>{t.begin} <ArrowRight size={17}/></button></div>}
@@ -362,7 +361,7 @@ function App() {
           <div className="integrated-analysis"><h3>{t.analysis}</h3><p>{lastResult?.performance}</p><h3>{t.strengths}</h3><p>{lastResult?.suggestions}</p></div>
           <p className="result-note">{t.reportNote}</p>
           <div className="result-actions"><button className="outline-btn" onClick={()=>window.print()}><Printer size={16}/>{t.print}</button><button className="primary-btn" onClick={()=>navTo('reports')}>Ver informes <ArrowRight size={17}/></button></div>
-        </div><div className="disclaimer">{t.disclaimer}</div>
+        </div>
       </div>}
       {page==='reports' && <div className="page-content"><PageHeading eyebrow="REPORTS" title={t.reportTitle}/>{results.length?<><div className="report-toolbar"><button className="outline-btn" onClick={()=>window.print()}><Printer size={16}/>{t.print}</button><button className="outline-btn" onClick={()=>{const blob=new Blob([JSON.stringify(results,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='harrison-loft-informe-integrado.json';a.click();URL.revokeObjectURL(a.href)}}><Download size={16}/>{t.download}</button></div><ResultsTable results={results} lang={lang} t={t}/></>:<div className="empty-state"><FileText size={34}/><p>{t.reportEmpty}</p></div>}</div>}
       {page==='profile' && <div className="page-content"><PageHeading eyebrow="ACCOUNT" title={t.profileTitle}/><div className="profile-card"><div className="profile-avatar">{(profile.name||'M').slice(0,1).toUpperCase()}</div><label>{t.name}<input value={nameInput} onChange={e=>setNameInput(e.target.value)} maxLength={40}/></label><label>{t.language}<select value={lang} onChange={e=>setLang(e.target.value)}><option value="en">English</option><option value="es">Español</option></select></label><button className="primary-btn" onClick={()=>setProfile({name:nameInput.trim()||'Maria'})}>{t.save}</button><p className="saved-note">{t.profileSaved}</p></div></div>}
