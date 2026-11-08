@@ -87,3 +87,40 @@ footer{margin-top:auto;padding:18px 3%;border-top:1px solid #e3eaf2;color:#65788
 .study-heading{display:flex;align-items:center;gap:11px;color:#14578c;font-size:21px;font-weight:800;margin:10px 0 14px}
 .study-reminder{font-size:13px;color:#657b91;line-height:1.6;margin:15px 0 0}
 @media(max-width:680px){.intro-test-details{gap:8px}.intro-test-details span{flex:1;min-width:90px;padding:10px}.intro-test-panel .primary-btn{width:100%;justify-content:center}.study-panel .test-actions{align-items:stretch}}
+
+
+/* Pantalla de acceso de demostración */
+.login-screen{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:28px 18px;
+  background:linear-gradient(135deg,#eef4fa 0%,#f8fafc 48%,#e8f0f8 100%);
+}
+.login-card{
+  width:min(100%,470px);
+  background:#fff;
+  border:1px solid #e1e9f1;
+  border-radius:22px;
+  box-shadow:0 22px 65px rgba(23,55,86,.12);
+  padding:clamp(26px,5vw,42px);
+}
+.login-brand{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px}
+.login-brand img{width:76px;height:76px;object-fit:contain;margin-bottom:10px}
+.login-brand span{font-size:17px;font-weight:800;letter-spacing:.13em;color:#173e63}
+.login-brand small{font-size:9px;letter-spacing:.11em;color:#7890a8;margin-top:6px}
+.login-heading{text-align:center;margin-bottom:25px}
+.login-eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;color:#3b79aa}
+.login-heading h1{font-size:30px;color:#102f50;margin:9px 0}
+.login-heading p{font-size:14px;line-height:1.65;color:#687e93;margin:0}
+.login-form{display:flex;flex-direction:column;gap:9px}
+.login-form label{font-size:13px;font-weight:700;color:#294761;margin-top:7px}
+.login-form input{
+  width:100%;min-height:49px;padding:12px 14px;border:1px solid #d8e2ec;
+  border-radius:10px;background:#fbfdff;color:#173e63;font-size:14px;outline:none;
+}
+.login-form input:focus{border-color:#397fb5;box-shadow:0 0 0 3px rgba(57,127,181,.12)}
+.login-form input::placeholder{color:#9aaaba}
+.login-error{margin:4px 0 0;color:#b83232;background:#fff2f1;border:1px solid #f3d5d2;border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.5}
+.login-submit{width:100%;justify-content:center;margin-top:13px;min-height:49px}
+.login-footnote{text-align:center;color:#94a3b2;font-size:11px;margin:24px 0 0}

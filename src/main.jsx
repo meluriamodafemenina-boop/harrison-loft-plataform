@@ -115,6 +115,10 @@ const sectionNames = { memory:'Memoria', attention:'Atención', reading:'Lectura
 
 function App() {
   const [lang, setLang] = useState(localStorage.getItem('hl-lang') || 'es')
+  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('hl-auth') === '1')
+  const [loginUsername, setLoginUsername] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
   const [page, setPage] = useState('home')
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -138,6 +142,35 @@ function App() {
   useEffect(() => { localStorage.setItem('hl-lang', lang); document.documentElement.lang = lang }, [lang])
   useEffect(() => { localStorage.setItem('hl-results', JSON.stringify(results)) }, [results])
   useEffect(() => { localStorage.setItem('hl-profile', JSON.stringify(profile)) }, [profile])
+
+  function handleLogin(event) {
+    event.preventDefault()
+    if (!loginUsername.trim()) {
+      setLoginError('Escribe un nombre de usuario para continuar.')
+      return
+    }
+    if (loginPassword !== '369260') {
+      setLoginError('La contraseña no es correcta. Inténtalo de nuevo.')
+      return
+    }
+    const enteredName = loginUsername.trim()
+    sessionStorage.setItem('hl-auth', '1')
+    sessionStorage.setItem('hl-user', enteredName)
+    setProfile(prev => ({ ...prev, name: enteredName }))
+    setNameInput(enteredName)
+    setLoginError('')
+    setLoginPassword('')
+    setIsAuthenticated(true)
+  }
+  function handleLogout() {
+    sessionStorage.removeItem('hl-auth')
+    sessionStorage.removeItem('hl-user')
+    setIsAuthenticated(false)
+    setLoginUsername('')
+    setLoginPassword('')
+    setLoginError('')
+    setPage('home')
+  }
 
   function beginAssessment() {
     setStep(0); setAnswers({}); setRemaining(40); setStartedAt(null); setTimedOut(false)
@@ -250,8 +283,33 @@ function App() {
           {step === 19 ? 'Finalizar y ver análisis' : 'Siguiente pregunta'} <ArrowRight size={17}/>
         </button>
       </div>
-      <p className="test-disclaimer"><ShieldCheck size={15}/> Ejercicio de práctica cognitiva; no constituye una prueba diagnóstica validada.</p>
     </section>
+  }
+
+  if (!isAuthenticated) {
+    return <div className="login-screen">
+      <div className="login-card">
+        <div className="login-brand">
+          <img src={ASSETS + 'harrison-loft-logo.png'} alt="Harrison & Loft"/>
+          <span>HARRISON &amp; LOFT</span>
+          <small>DEPARTAMENTO MÉDICO Y PSICOLÓGICO</small>
+        </div>
+        <div className="login-heading">
+          <span className="login-eyebrow">PLATAFORMA PRIVADA</span>
+          <h1>Bienvenido/a</h1>
+          <p>Ingresa tus datos para acceder a la plataforma de evaluación cognitiva.</p>
+        </div>
+        <form className="login-form" onSubmit={handleLogin}>
+          <label htmlFor="hl-login-user">Usuario</label>
+          <input id="hl-login-user" type="text" autoComplete="username" placeholder="Escribe cualquier nombre" value={loginUsername} onChange={e => { setLoginUsername(e.target.value); setLoginError('') }} />
+          <label htmlFor="hl-login-password">Contraseña</label>
+          <input id="hl-login-password" type="password" autoComplete="current-password" placeholder="Ingresa la contraseña" value={loginPassword} onChange={e => { setLoginPassword(e.target.value); setLoginError('') }} />
+          {loginError && <p className="login-error" role="alert">{loginError}</p>}
+          <button className="primary-btn login-submit" type="submit">Iniciar sesión <ArrowRight size={17}/></button>
+        </form>
+        <p className="login-footnote">Acceso de demostración · Harrison &amp; Loft</p>
+      </div>
+    </div>
   }
 
   return <div className="app-shell">
@@ -261,7 +319,7 @@ function App() {
         <h1>HARRISON & LOFT</h1><p>{t.department}</p>
       </div>
       <nav>{navItems.map(([Icon,id,label])=><button key={id} className={page===id?'active':''} onClick={()=>navTo(id)}><Icon size={20}/>{label}</button>)}
-        <button onClick={()=>navTo('home')}><LogOut size={20}/>{t.logout}</button>
+        <button onClick={handleLogout}><LogOut size={20}/>{t.logout}</button>
       </nav>
       <div className="sidebar-tagline">Better Assessment.<br/>A Healthier Tomorrow.</div>
     </aside>
