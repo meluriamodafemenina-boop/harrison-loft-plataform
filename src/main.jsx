@@ -301,13 +301,13 @@ function App() {
         </div>
         <form className="login-form" onSubmit={handleLogin}>
           <label htmlFor="hl-login-user">Usuario</label>
-          <input id="hl-login-user" type="text" autoComplete="username" placeholder="Escribe cualquier nombre" value={loginUsername} onChange={e => { setLoginUsername(e.target.value); setLoginError('') }} />
+          <input id="hl-login-user" type="text" autoComplete="username" placeholder="" value={loginUsername} onChange={e => { setLoginUsername(e.target.value); setLoginError('') }} />
           <label htmlFor="hl-login-password">Contraseña</label>
           <input id="hl-login-password" type="password" autoComplete="current-password" placeholder="Ingresa la contraseña" value={loginPassword} onChange={e => { setLoginPassword(e.target.value); setLoginError('') }} />
           {loginError && <p className="login-error" role="alert">{loginError}</p>}
           <button className="primary-btn login-submit" type="submit">Iniciar sesión <ArrowRight size={17}/></button>
         </form>
-        <p className="login-footnote">Acceso de demostración · Harrison &amp; Loft</p>
+        <p className="login-footnote">Prueba cognitiva general</p>
       </div>
     </div>
   }
