@@ -34,3 +34,22 @@ This starter contains educational/demo cognitive activities, not validated psych
 
 ## Image quality
 The supplied images are included in `public/images`. Some originals were small and were enlarged for layout use; enlargement cannot restore details that were not present in the source files. Replace with high-resolution originals for true HD hero imagery.
+
+
+## Evaluación cognitiva integral (versión actualizada)
+
+La plataforma incluye una sesión integrada de 20 ejercicios en español:
+- 5 ejercicios de memoria.
+- 5 ejercicios de atención.
+- 5 ejercicios de comprensión y razonamiento lector.
+- 5 ejercicios de percepción visual y razonamiento espacial.
+
+Cada pregunta dispone de 40 segundos. Si el tiempo se agota, la pregunta se registra como no respondida y el sistema avanza automáticamente. Al finalizar se genera un único resumen global con puntuación total, tiempo, preguntas no respondidas y una descripción general del desempeño.
+
+### Desarrollo y publicación
+- Instalar dependencias: `npm install`
+- Ejecutar localmente: `npm run dev`
+- Crear compilación: `npm run build`
+- Vista previa de producción: `npm run preview`
+
+Estas actividades son ejercicios de práctica educativa y no son instrumentos psicométricos estandarizados ni diagnósticos clínicos validados.
