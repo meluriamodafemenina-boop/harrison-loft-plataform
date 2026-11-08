@@ -129,6 +129,7 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [lastResult, setLastResult] = useState(null)
   const [timedOut, setTimedOut] = useState(false)
+  const [testStage, setTestStage] = useState('intro')
   const t = translations[lang]
   const current = assessment[step]
   const currentAreaIndex = current ? ['memory','attention','reading','visual'].indexOf(current.area) : 0
@@ -139,14 +140,24 @@ function App() {
   useEffect(() => { localStorage.setItem('hl-profile', JSON.stringify(profile)) }, [profile])
 
   function beginAssessment() {
-    setStep(0); setAnswers({}); setRemaining(40); setStartedAt(Date.now()); setTimedOut(false)
-    setPage('test'); setMobileOpen(false)
+    setStep(0); setAnswers({}); setRemaining(40); setStartedAt(null); setTimedOut(false)
+    setTestStage('intro'); setPage('test'); setMobileOpen(false)
+  }
+  function startFirstQuestion() {
+    setTestStage(assessment[0]?.type === 'study' ? 'study' : 'question')
+    setRemaining(40); setStartedAt(Date.now())
+  }
+  function finishStudyPhase() {
+    setTestStage('question'); setRemaining(40)
+    if (!startedAt) setStartedAt(Date.now())
   }
   function advance(expired = false) {
     setAnswers(prev => ({ ...prev, [step]: expired ? null : prev[step] ?? null }))
     setTimedOut(expired)
     if (step < assessment.length - 1) {
-      setStep(s => s + 1); setRemaining(40); setTimedOut(false)
+      const nextStep = step + 1
+      setStep(nextStep); setRemaining(40); setTimedOut(false)
+      setTestStage(assessment[nextStep]?.type === 'study' ? 'study' : 'question')
     } else {
       finishAssessment(expired)
     }
@@ -178,11 +189,11 @@ function App() {
   }
   function setAnswer(value) { setAnswers(prev => ({ ...prev, [step]: value })) }
   useEffect(() => {
-    if (page !== 'test') return
+    if (page !== 'test' || testStage !== 'question') return
     if (remaining <= 0) { advance(true); return }
     const timer = window.setTimeout(() => setRemaining(value => value - 1), 1000)
     return () => window.clearTimeout(timer)
-  }, [page, remaining, step])
+  }, [page, testStage, remaining, step])
 
   function navTo(target) { setPage(target); setMobileOpen(false) }
   const navItems = [
@@ -194,6 +205,24 @@ function App() {
   function renderQuestion() {
     if (!current) return null
     const q = current
+    if (testStage === 'intro') return <section className="test-panel intro-test-panel">
+      <div className="intro-test-icon"><Brain size={38}/></div>
+      <span className="eyebrow">HARRISON &amp; LOFT</span>
+      <h1>Comenzando con el test cognitivo general</h1>
+      <p>Esta evaluación reúne 20 preguntas distribuidas en cuatro áreas: memoria, atención, lectura y percepción visual.</p>
+      <div className="intro-test-details"><span><strong>20</strong> preguntas</span><span><strong>40 s</strong> por pregunta</span><span><strong>1</strong> informe global</span></div>
+      <p className="intro-test-note">Lee las instrucciones de cada ejercicio con atención. En las preguntas de memoria primero podrás estudiar el material; después se ocultará y aparecerán las opciones de respuesta.</p>
+      <button className="primary-btn" onClick={startFirstQuestion}>Comenzar test cognitivo <ArrowRight size={17}/></button>
+    </section>
+    if (testStage === 'study' && q.type === 'study') return <section className="test-panel study-panel">
+      <div className="test-top"><span>Memoria · Fase de memorización</span><span>Pregunta {step + 1} de 20</span></div>
+      <div className="global-progress"><span style={{width:`${(step+1)/20*100}%`}}/></div>
+      <div className="study-heading"><Brain size={25}/><span>Memoriza antes de continuar</span></div>
+      <p className="question-instructions">{q.prompt}</p>
+      <div className="stimulus-panel"><div className="stimulus-label">Material para memorizar</div>{Array.isArray(q.stimulus) ? <div className="stimulus-grid">{q.stimulus.map((x,i)=><span key={i}>{x}</span>)}</div> : <div className="stimulus-text">{q.stimulus}</div>}</div>
+      <p className="study-reminder">Cuando estés listo, pulsa el botón. El material se ocultará y comenzará el tiempo para responder.</p>
+      <div className="test-actions"><span className="answer-hint">Tómate el tiempo necesario para memorizar.</span><button className="primary-btn" onClick={finishStudyPhase}>Ya memoricé <ArrowRight size={17}/></button></div>
+    </section>
     const sectionNumber = currentAreaIndex + 1
     return <section className="test-panel">
       <div className="test-top">
@@ -206,7 +235,7 @@ function App() {
         <span className={`timer ${remaining <= 10 ? 'urgent' : ''}`}><Clock3 size={17}/>{String(remaining).padStart(2,'0')} s</span>
       </div>
       <p className="question-instructions">{q.prompt}</p>
-      {q.stimulus && <div className="stimulus-panel"><div className="stimulus-label">{q.area === 'memory' ? 'Material para memorizar' : 'Secuencia para analizar'}</div>{Array.isArray(q.stimulus) ? <div className="stimulus-grid">{q.stimulus.map((x,i)=><span key={i}>{x}</span>)}</div> : <div className="stimulus-text">{q.stimulus}</div>}</div>}
+      {q.stimulus && q.area !== 'memory' && <div className="stimulus-panel"><div className="stimulus-label">{q.area === 'memory' ? 'Material para memorizar' : 'Secuencia para analizar'}</div>{Array.isArray(q.stimulus) ? <div className="stimulus-grid">{q.stimulus.map((x,i)=><span key={i}>{x}</span>)}</div> : <div className="stimulus-text">{q.stimulus}</div>}</div>}
       {q.visual && <div className={`visual-stimulus ${q.matrix ? 'matrix-stimulus' : ''}`}>
         {q.visual.map((x,i)=><span key={i}>{x}</span>)}
       </div>}
@@ -260,7 +289,7 @@ function App() {
       </>}
 
       {page==='assessments' && <div className="page-content"><PageHeading eyebrow="HARRISON & LOFT" title={t.choose}/><p className="assessment-intro">{t.instructions}</p><section className="activity-grid">{activities.map(item=><ActivityCard key={item.id} item={item} t={t} onClick={beginAssessment}/>)}</section><button className="primary-btn full-assessment-btn" onClick={beginAssessment}>{t.begin} <ArrowRight size={17}/></button></div>}
-      {page==='test' && <div className="page-content"><div className="assessment-instructions"><AlertTriangle size={18}/><p>{translations.es.instructions}</p></div>{renderQuestion()}</div>}
+      {page==='test' && <div className="page-content">{testStage === 'question' && <div className="assessment-instructions"><AlertTriangle size={18}/><p>{translations.es.instructions}</p></div>}{renderQuestion()}</div>}
       {page==='result' && <div className="page-content"><PageHeading eyebrow="HARRISON & LOFT · INFORME INTEGRADO" title={t.result}/>
         <div className="result-card integrated-result">
           <div className="result-icon"><CheckCircle2 size={34}/></div>
